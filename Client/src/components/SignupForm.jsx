@@ -1,12 +1,15 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { ValidateSingup } from '../validate/validator'
 import registerUser from '../validate/registerUser'
-
+import UserContext from "../context/UserContext"
 const SignupForm = () => {
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
     const [authError, setAuthError] = useState(null)
+    const navigate = useNavigate();
+    const userState = useContext(UserContext)
     const name = useRef()
     const email = useRef()
     const password = useRef()
@@ -38,7 +41,8 @@ const SignupForm = () => {
         }
         if (userData?.token) {
             localStorage.setItem("key", userData.token);
-            
+            userState.setUser(localStorage.getItem("key"));
+            navigate("/");
         }
 
     }
