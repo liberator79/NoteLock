@@ -1,24 +1,45 @@
-import { useRef, useState } from "react"
+import { useRef, useState, useContext } from "react"
 import { IoMdAdd } from "react-icons/io";
 import { BiSolidHide } from "react-icons/bi";
 import { BiSolidShow } from "react-icons/bi";
-const CreatePasswords = ({ passwords, setPasswords }) => {
+import { PasswordsContext } from "../context/PasswordsContext";
+const CreatePasswords = () => {
   const title = useRef();
   const password = useRef();
   const [visible, setVisible] = useState(false);
+  const passwordsState = useContext(PasswordsContext);
+  const key = localStorage.getItem("key");
   const toggleVisible = () => {
     setVisible(!visible);
   }
   const addPassword = () => {
-
-    console.log(title.current.value)
     if (title.current.value.trim() === '' || password.current.value.trim() === '') {
       return null;
     }
-    console.log("hello")
-    setPasswords([...passwords, { "title": title.current.value, "password": password.current.value }]);
+    const postData = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/passwords", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': key
+          },
+          body: JSON.stringify({ "title": title.current.value, "password": password.current.value })
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json()
+        passwordsState.setPasswords([...passwordsState.passwords, data]);
+      } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+      }
+    }
+    postData();
     title.current.value = '';
     password.current.value = '';
+    return;
   }
   return (
     <div className="w-[50%] flex items-end justify-end">

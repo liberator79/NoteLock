@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { BiSolidHide } from "react-icons/bi";
 import { BiSolidShow } from "react-icons/bi";
-const PasswordCard = ({ title, password, id, Delete }) => {
+const PasswordCard = ({ title, password, id, Delete, updatedAt }) => {
     const [visible, setVisible] = useState(false);
     const DeleteCard = () => {
         Delete(id);
@@ -26,14 +26,14 @@ const PasswordCard = ({ title, password, id, Delete }) => {
                         </p>
                     </div>
                     <div className="cursor-pointer -translate-y-1" onClick={toggleVisible}>
-                            {visible ? <BiSolidShow/> : <BiSolidHide/>}
+                        {visible ? <BiSolidShow /> : <BiSolidHide />}
                     </div>
                 </div>
 
             </div>
             <div className='text-sm flex bg-gray-700 rounded-b-md justify-between p-1 text-white items-center'>
                 <div >
-                    Lasted updated
+                    {updatedAt.substr(0, 10)}
                 </div>
                 <div className='p-2 rounded-full hover:bg-green-500 hover:text-black cursor-pointer' onClick={DeleteCard}>
                     <MdDeleteOutline />

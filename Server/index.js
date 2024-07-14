@@ -48,13 +48,13 @@ app.post("/notes", auth, async (req, res) => {
 })
 app.post("/passwords", auth, async (req, res) => {
     const { title, password } = req.body;
-    const newNotes = new Passwords({
+    const newPassword = new Passwords({
         title,
         password,
         userId: req.user,
     })
-    await newNotes.save()
-    res.send("Sucess");
+    await newPassword.save()
+    res.json(newPassword)
 })
 app.get("/notes", auth, async (req, res) => {
 
@@ -62,6 +62,14 @@ app.get("/notes", auth, async (req, res) => {
 
     res.json(notes)
 })
+
+app.get("/passwords", auth, async (req, res) => {
+
+    const passwords = await Passwords.find({ userId: req.user._id });
+
+    res.json(passwords)
+})
+
 app.get("/notes/:id", auth, async (req, res) => {
     try {
         const { id } = req.params;
@@ -105,7 +113,7 @@ app.put('/notes/:id', auth, async (req, res) => {
     catch {
         res.status(500).json({ message: 'Internal server error' });
     }
-    
+
 });
 
 
@@ -113,15 +121,33 @@ app.put('/notes/:id', auth, async (req, res) => {
 
 
 app.delete("/notes/:id", auth, async (req, res) => {
-    try{
-        const {id} = req.params;
+    try {
+        const { id } = req.params;
         const result = await Notes.findByIdAndDelete(id);
-        if(!result){
-            res.status(404).send({message : "Notes not found"});
+        if (!result) {
+            res.status(404).send({ message: "Notes not found" });
         }
-        res.send({message : "deleted successfully"});
-    }catch(e){
+        else {
+            res.send({ message: "deleted successfully" });
+        }
+
+    } catch (e) {
         res.status(500).send({ message: 'Error deleting notes', error })
+    }
+})
+
+app.delete("/passwords/:id", auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await Passwords.findByIdAndDelete(id);
+        if (!result) {
+            res.status(404).send({ message: "Password not found" });
+        } else {
+            res.send({ message: "Success" });
+        }
+
+    } catch (e) {
+        res.status(500).send({ message: "error deleting password", e })
     }
 })
 

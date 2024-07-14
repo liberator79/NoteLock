@@ -18,7 +18,7 @@ const Note = () => {
         });
         if (response.ok) {
           const result = await response.json();
-          notesState.setNotes(notesState.notes.filter((item, ind) => {
+          notesState.setNotes(notesState.notes.filter((item) => {
             return item._id !== id;
           }))
         } else {
