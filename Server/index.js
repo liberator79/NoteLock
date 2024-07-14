@@ -41,7 +41,7 @@ app.post("/notes", auth, async (req, res) => {
             userId: req.user,
         })
         await newNotes.save()
-        res.send("Success")
+        res.json(newNotes)
     } catch (err) {
         res.json({ error: err.message })
     }
@@ -112,7 +112,18 @@ app.put('/notes/:id', auth, async (req, res) => {
 
 
 
-
+app.delete("/notes/:id", auth, async (req, res) => {
+    try{
+        const {id} = req.params;
+        const result = await Notes.findByIdAndDelete(id);
+        if(!result){
+            res.status(404).send({message : "Notes not found"});
+        }
+        res.send({message : "deleted successfully"});
+    }catch(e){
+        res.status(500).send({ message: 'Error deleting notes', error })
+    }
+})
 
 
 const connectToDB = () => {

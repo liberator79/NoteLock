@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { FaEdit } from "react-icons/fa";
+import { NotesContext } from "../context/NoteContext";
 
 const Notes = () => {
     const { notesId } = useParams();
@@ -8,12 +9,11 @@ const Notes = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const key = localStorage.getItem("key");
-
+    const notesState = useContext(NotesContext);
     const textRef = useRef();
     const titleRef = useRef();
-
     const updateItem = async () => {
-        if(!textRef.current.value || !titleRef.current.value){
+        if (!textRef.current.value || !titleRef.current.value) {
             return;
         }
         try {
@@ -34,12 +34,12 @@ const Notes = () => {
             }
             const data = await response.json();
             setNotes(data);
+            notesState.updateNote(notesId, data);
 
             if (textRef.current && titleRef.current) {
                 textRef.current.value = data.text;
                 titleRef.current.value = data.title;
             }
-
         } catch (error) {
             setError("Error Updating Data");
             console.error('Error updating data:', error);
@@ -51,23 +51,25 @@ const Notes = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch("http://localhost:3000/notes/" + notesId, {
-                    method: "GET",
-                    headers: {
-                        'Authorization': key
+                let note = notesState.notes.find(note => note.id === notesId);
+                if (!note) {
+                    const response = await fetch("http://localhost:3000/notes/" + notesId, {
+                        method: "GET",
+                        headers: {
+                            'Authorization': key
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
-                });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    note = await response.json();
                 }
-                const data = await response.json();
-                setNotes(data);
+                setNotes(note);
 
                 if (textRef.current && titleRef.current) {
-                    textRef.current.value = data.text;
-                    titleRef.current.value = data.title;
+                    textRef.current.value = note.text;
+                    titleRef.current.value = note.title;
                 }
-
             } catch (error) {
                 setError("Error Fetching Data");
                 console.error('Error fetching data:', error);
@@ -77,7 +79,7 @@ const Notes = () => {
         };
 
         fetchData();
-    }, [notesId, key]);
+    }, [notesId, key, notesState.notes]);
 
     if (loading) {
         return (
@@ -108,7 +110,7 @@ const Notes = () => {
                                 placeholder="title"
                                 className="bg-gray-800 focus:bg-gray-900 opacity-80 text-white rounded-t-md w-full p-2 focus-visible:outline-none"
                                 ref={titleRef}
-                                defaultValue={titleRef.current?.value}
+                                defaultValue={notes.title}
                             />
                             <div className="h-[1px] bg-green-500 w-full"></div>
                             <textarea
@@ -116,6 +118,7 @@ const Notes = () => {
                                 className="bg-gray-800 focus:bg-gray-900 opacity-80 text-white rounded-b-md w-[100%] p-2 focus-visible:outline-none"
                                 placeholder="Notes here"
                                 ref={textRef}
+                                defaultValue={notes.text}
                             ></textarea>
                         </div>
                         <div className="bg-green-500 rounded-full p-2 h-fit -translate-x-4 cursor-pointer translate-y-2" onClick={updateItem}>
@@ -126,6 +129,6 @@ const Notes = () => {
             )}
         </div>
     );
-}
+};
 
 export default Notes;

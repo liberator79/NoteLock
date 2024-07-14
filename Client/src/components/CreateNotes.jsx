@@ -1,9 +1,11 @@
 import { IoMdAdd } from "react-icons/io";
-import { useState, useRef } from "react";
+import { useRef, useContext } from "react";
+import { NotesContext } from "../context/NoteContext";
 
-const CreateNotes = ({ notes, setNotes }) => {
+const CreateNotes = () => {
     const title = useRef();
     const text = useRef();
+    const notesState = useContext(NotesContext)
     const key = "Bearer " + localStorage.getItem("key");
     const addNote = () => {
         if (text.current.value.trim() == '') {
@@ -23,6 +25,8 @@ const CreateNotes = ({ notes, setNotes }) => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
+                const data = await response.json()
+                notesState.setNotes([...notesState.notes, data]);
             } catch (error) {
                 console.error('There has been a problem with your fetch operation:', error);
             }
